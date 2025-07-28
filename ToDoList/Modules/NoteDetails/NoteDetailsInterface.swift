@@ -9,7 +9,9 @@ import Foundation
 
 protocol INoteDetailsView: AnyObject {}
 
-protocol INoteDetailsPresenter: AnyObject {}
+protocol INoteDetailsPresenter: AnyObject {
+    func saveState()
+}
 
 protocol INoteDetailsInteractor: AnyObject {}
 

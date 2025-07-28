@@ -16,6 +16,7 @@ struct ToDos: Codable {
 
 struct Note: Codable, Hashable {
     let id: Int
+    var title: String?
     let todo: String
     let completed: Bool
     let userId: Int
@@ -27,7 +28,7 @@ struct Note: Codable, Hashable {
         let randomTimeInterval = TimeInterval.random(in: startDate.timeIntervalSinceNow...endDate.timeIntervalSinceNow)
         
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "d.M.yyyy"
+        dateFormatter.dateFormat = "dd/MM/yy"
         return dateFormatter.string(from: Date(timeIntervalSinceNow: randomTimeInterval))
     }
 }

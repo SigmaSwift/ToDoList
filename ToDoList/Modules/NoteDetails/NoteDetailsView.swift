@@ -20,6 +20,20 @@ class NoteDetailsView: UIViewController {
         setup()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // save info
+        presenter?.saveState()
+    }
+    
+    func set(_ note: Note, isEditable: Bool) {
+        titleLabel.text = "\(note.id)"
+        dateLabel.text = note.date
+        textView.text = note.todo
+        textView.isEditable = isEditable
+    }
+    
     private func setup() {
         view.backgroundColor = .white
         
@@ -44,13 +58,6 @@ class NoteDetailsView: UIViewController {
         
         titleLabel.font = .systemFont(ofSize: 32)
         textView.font = .systemFont(ofSize: 25)
-    }
-    
-    func set(_ note: Note, isEditable: Bool) {
-        titleLabel.text = "\(note.id)"
-        dateLabel.text = note.date
-        textView.text = note.todo
-        textView.isEditable = isEditable
     }
 }
 

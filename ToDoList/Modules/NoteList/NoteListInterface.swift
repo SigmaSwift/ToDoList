@@ -14,13 +14,18 @@ protocol INoteListView: AnyObject {
 protocol INoteListPresenter: AnyObject {
     func viewDidLoaded()
     func didLoad(_ notes: [Note])
-    func didTap(_ note: Note, isEditable: Bool)
+    func didTapOn(_ note: Note, isEditable: Bool)
+    func delete(_ id: Int)
+    func addNote()
 }
 
 protocol INoteListInteractor: AnyObject {
     func loadList()
+    func generateUserId() -> Int
+    func getLastId() -> Int
 }
 
 protocol INoteListRouter: AnyObject {
     func openDetails(with note: Note, isEditable: Bool)
+    func presentAddNote(_ lastId: Int, userId: Int)
 }

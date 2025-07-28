@@ -12,5 +12,7 @@ class NoteDetailsPresenter {
 }
 
 extension NoteDetailsPresenter: INoteDetailsPresenter {
-    
+    func saveState() {
+        //
+    }
 }

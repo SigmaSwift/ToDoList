@@ -7,27 +7,22 @@
 
 import Foundation
 
-protocol NoteService {
-    func getData() async throws -> ToDos
-    func getNotes() async throws -> [Note]
-}
-
-class RestNoteService: NoteService {
+class RestNoteService: INoteService {
     func getData() async throws -> ToDos {
         guard let endpoint: URL = .init(string: "https://dummyjson.com/todos") else {
-            throw TaskError.invalidURL
+            throw HTTPError.invalidURL
         }
         
         let (data, response) = try await URLSession.shared.data(from: endpoint)
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw TaskError.invalidResponse
+            throw HTTPError.invalidResponse
         }
         
         do {
             let decoder = JSONDecoder()
             return try decoder.decode(ToDos.self, from: data)
         } catch {
-            throw TaskError.invalidData
+            throw HTTPError.invalidData
         }
     }
     
@@ -36,12 +31,12 @@ class RestNoteService: NoteService {
             let todos = try await getData()
             return todos.todos
         } catch {
-            throw TaskError.invalidResponse
+            throw HTTPError.invalidResponse
         }
     }
 }
 
-enum TaskError: Error {
+enum HTTPError: Error {
     case invalidURL
     case invalidData
     case invalidResponse

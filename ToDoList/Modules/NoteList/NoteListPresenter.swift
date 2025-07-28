@@ -19,12 +19,23 @@ class NoteListPresenter {
 }
 
 extension NoteListPresenter: INoteListPresenter {
-    func didLoad(_ notes: [Note]) {
-        view?.show(notes)
+    func delete(_ id: Int) {
+        //
     }
     
-    func didTap(_ note: Note, isEditable: Bool) {
+    func didTapOn(_ note: Note, isEditable: Bool) {
         router.openDetails(with: note, isEditable: isEditable)
+    }
+    
+    func addNote() {
+        let id = interactor.getLastId()
+        let userId = interactor.generateUserId()
+       
+        router.presentAddNote(id, userId: userId)
+    }
+    
+    func didLoad(_ notes: [Note]) {
+        view?.show(notes)
     }
     
     func viewDidLoaded() {

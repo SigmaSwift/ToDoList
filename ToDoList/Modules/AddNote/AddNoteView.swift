@@ -13,26 +13,36 @@ class AddNoteView: UIViewController {
     private let titleField: UITextField = .init()
     private let descriptionView: UITextView = .init()
     
-    var lastNoteId: Int = .zero
-    var userId: Int = .zero
+    var lastNoteId: Int?
+    var userId: Int?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setup()
-        view.backgroundColor = .systemGreen
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        titleField.becomeFirstResponder()
     }
     
     private func setup() {
+        view.backgroundColor = DesignSystem.Color.primaryBlack
+        
         let titleLabel = UILabel()
         titleLabel.text = "Add note"
+        titleLabel.font = .boldSystemFont(ofSize: 24)
+        titleLabel.textColor = DesignSystem.Color.primaryWhite
         
-        let closeButton = UIButton(type: .close)
+        let closeButton = UIButton()
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
+        closeButton.setTitle("Close", for: .normal)
         
         let saveButton = UIButton(type: .custom)
-        saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         saveButton.setTitle("Save", for: .normal)
+        saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         
         let hStack = UIStackView(arrangedSubviews: [ closeButton, titleLabel, saveButton ])
         hStack.axis = .horizontal
@@ -43,8 +53,11 @@ class AddNoteView: UIViewController {
         titleField.keyboardType = .numberPad
         
         descriptionView.layer.borderColor = UIColor.lightGray.cgColor
-        descriptionView.layer.borderWidth = 1
+        descriptionView.layer.borderWidth = 2
         descriptionView.layer.cornerRadius = 5
+        descriptionView.backgroundColor = .black
+        descriptionView.textColor = DesignSystem.Color.primaryWhite
+        descriptionView.font = .systemFont(ofSize: 24)
         
         let vStack = UIStackView(arrangedSubviews: [ hStack, titleField, descriptionView ])
         vStack.axis = .vertical
@@ -53,13 +66,12 @@ class AddNoteView: UIViewController {
         
         view.addSubview(vStack)
         
-        let padding: CGFloat = 20
-        
+        let padding: CGFloat = 20.0
         NSLayoutConstraint.activate([
             vStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
             vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: padding),
-            vStack.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding)
+            vStack.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding * 2)
         ])
     }
     
@@ -70,7 +82,10 @@ class AddNoteView: UIViewController {
     
     @objc
     private func saveButtonTapped() {
-        guard titleField.hasText, descriptionView.hasText else { return }
+        guard
+            let lastNoteId, let userId,
+            titleField.hasText, descriptionView.hasText
+        else { return }
         
         let newNote = Note(
             id: lastNoteId + 1,
@@ -81,8 +96,19 @@ class AddNoteView: UIViewController {
         )
         
         presenter?.save(newNote)
-        dismiss(animated: true)
     }
 }
 
-extension AddNoteView: IAddNoteView { }
+extension AddNoteView: IAddNoteView {
+    func showAlert(with title: String, body: String) {
+        let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Ok", style: .default)
+        alert.addAction(okAction)
+        
+        present(alert, animated: true)
+    }
+    
+    func dismiss() {
+        dismiss(animated: true)
+    }
+}

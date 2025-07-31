@@ -7,6 +7,4 @@
 
 class AddNoteRouter: IAddNoteRouter {
     weak var view: AddNoteView?
-    
-    
 }

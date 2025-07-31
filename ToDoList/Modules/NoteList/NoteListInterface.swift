@@ -9,6 +9,8 @@ import Foundation
 
 protocol INoteListView: AnyObject {
     func show(_ notes: [Note])
+    func updateNotesList(with note: Note)
+    func dismissAlert()
 }
 
 protocol INoteListPresenter: AnyObject {
@@ -16,13 +18,15 @@ protocol INoteListPresenter: AnyObject {
     func didLoad(_ notes: [Note])
     func didTapOn(_ note: Note, isEditable: Bool)
     func delete(_ id: Int)
-    func addNote()
+    func addNoteDidTap()
 }
 
 protocol INoteListInteractor: AnyObject {
-    func loadList()
-    func generateUserId() -> Int
+    func loadList() async throws
+    func deleteNote(with id: Int)
+    
     func getLastId() -> Int
+    func generateUserId() -> Int
 }
 
 protocol INoteListRouter: AnyObject {

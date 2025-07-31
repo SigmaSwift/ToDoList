@@ -7,9 +7,15 @@
 
 import Foundation
 
-protocol ICoreDataService {
-    func fetchNodes() async -> [Note]
-    func addNode(_ note: Note) async
-    func updateNode(_ id: Int, title: String, description: String, isCompleted: Bool) async
-    func deleteNode(_ id: Int) async
+protocol ICoreDataManager {
+    func save(notes: [Note]) throws
+    func save(note: Note) throws
+    func fetchNotes() throws -> [Note]
+    func updateNote(
+        with id: Int,
+        title: String,
+        description: String,
+        isCompleted: Bool
+    ) throws
+    func deleteNote(with id: Int) throws
 }

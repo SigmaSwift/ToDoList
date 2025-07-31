@@ -1,5 +1,5 @@
 //
-//  SearchBar.swift
+//  SearchBarView.swift
 //  ToDoList
 //
 //  Created by Khachatur Sargsyan on 28.07.25.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class SearchBar: UIView {
+final class SearchBarView: UIView {
     private let searchBarContainer: UIView = .init()
     
     private let titleLabel: UILabel = .init()
@@ -167,7 +167,7 @@ final class SearchBar: UIView {
     }
 }
 
-extension SearchBar: UITextFieldDelegate {
+extension SearchBarView: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         cancelButton.isHidden = false
         animateableChangeConstraint(searchContainerTrailingConstraint, constant: -80)

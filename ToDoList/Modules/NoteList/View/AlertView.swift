@@ -1,5 +1,5 @@
 //
-//  Alert.swift
+//  AlertView.swift
 //  ToDoList
 //
 //  Created by Khachatur Sargsyan on 27.07.25.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class Alert: UIView {
+class AlertView: UIView {
     struct AlertModel {
         enum Action {
             case edit
@@ -21,11 +21,11 @@ class Alert: UIView {
         var tint: UIColor?
     }
     
-    private var content: [ UIView ] = []
+    private var content: [UIView] = []
     
     var didTap: ((AlertModel.Action) -> Void)?
     
-    func set(models: [ AlertModel ]) {
+    func set(models: [AlertModel]) {
         for (index, model) in models.enumerated() {
             let label = UILabel()
             let image = UIImageView(image: UIImage(systemName: model.image))

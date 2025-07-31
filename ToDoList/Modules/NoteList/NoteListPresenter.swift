@@ -20,14 +20,15 @@ class NoteListPresenter {
 
 extension NoteListPresenter: INoteListPresenter {
     func delete(_ id: Int) {
-        //
+        interactor.deleteNote(with: id)
+        view?.dismissAlert()
     }
     
     func didTapOn(_ note: Note, isEditable: Bool) {
         router.openDetails(with: note, isEditable: isEditable)
     }
     
-    func addNote() {
+    func addNoteDidTap() {
         let id = interactor.getLastId()
         let userId = interactor.generateUserId()
        
@@ -39,6 +40,14 @@ extension NoteListPresenter: INoteListPresenter {
     }
     
     func viewDidLoaded() {
-        interactor.loadList()
+        Task {
+            try await interactor.loadList()
+        }
+    }
+}
+
+extension NoteListPresenter: IAddNoteModuleOutput {
+    func addedNote(_ note: Note) {
+        view?.updateNotesList(with: note)
     }
 }

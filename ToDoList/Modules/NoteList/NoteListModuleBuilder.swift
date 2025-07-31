@@ -11,13 +11,15 @@ class NoteListModuleBuilder {
     static func build() -> NoteListView {
         let view = NoteListView()
         let restNoteService = RestNoteService()
-        
-        let interactor = NoteListInteractor(noteService: restNoteService)
+
+        let coreDataManager = CoreDataManager()
+        let interactor = NoteListInteractor(noteService: restNoteService, storeManger: coreDataManager)
         let router = NoteListRouter()
         let presenter = NoteListPresenter(router: router, interactor: interactor)
         
         view.presenter = presenter
         interactor.presenter = presenter
+        router.presenter = presenter
         
         router.view = view
         presenter.view = view

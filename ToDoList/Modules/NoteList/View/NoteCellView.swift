@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class NoteCell: UITableViewCell {
+final class NoteCellView: UITableViewCell {
     private let titleLabel: UILabel = .init()
     private let descriptionLabel: UILabel = .init()
     private let dateLabel: UILabel = .init()
@@ -29,6 +29,8 @@ final class NoteCell: UITableViewCell {
     }
     
     private func setup() {
+        backgroundColor = DesignSystem.Color.primaryWhite
+        
         vStack.axis = .vertical
         vStack.spacing = 4
         
@@ -43,6 +45,8 @@ final class NoteCell: UITableViewCell {
         
         contentView.addSubview(hStack)
         contentView.backgroundColor = .black
+        
+        descriptionLabel.numberOfLines = 0
         
         let padding: CGFloat = 10.0
         NSLayoutConstraint.activate([
@@ -60,13 +64,17 @@ final class NoteCell: UITableViewCell {
         let tintColor: UIColor?
         let secondaryGray = DesignSystem.Color.secondaryGray
         if note.completed {
-            checkmarkView.image = UIImage(named: "done-circle")
             tintColor = secondaryGray
+            
+            checkmarkView.image = UIImage(named: "done-circle")
             titleLabel.setStrikethroughText(note.title ?? String(note.id), tintColor)
         } else {
-            checkmarkView.image = UIImage(named: "empty-circle")
-            titleLabel.text = note.title ?? String(note.id)
             tintColor = DesignSystem.Color.primaryWhite
+            
+            checkmarkView.image = UIImage(named: "empty-circle")
+            titleLabel.attributedText = nil
+            titleLabel.text = note.title ?? String(note.id)
+            titleLabel.textColor = tintColor
         }
         
         descriptionLabel.text = note.todo

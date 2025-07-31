@@ -8,12 +8,18 @@
 import UIKit
 
 class AddNoteModuleBuilder {
-    static func build(_ lastNoteId: Int, userId: Int) -> AddNoteView {
+    static func build(
+        _ lastNoteId: Int,
+        userId: Int,
+        moduleOutput: IAddNoteModuleOutput?
+    ) -> AddNoteView {
         let view = AddNoteView()
+        
         view.lastNoteId = lastNoteId
         view.userId = userId
         
-        let interactor = AddNoteInteractor()
+        let dataManager = CoreDataManager()
+        let interactor = AddNoteInteractor(storeManager: dataManager)
         let router = AddNoteRouter()
         let presenter = AddNotePresenter(router: router, interactor: interactor)
         
@@ -22,6 +28,8 @@ class AddNoteModuleBuilder {
         
         router.view = view
         presenter.view = view
+        
+        presenter.output = moduleOutput
         
         return view
     }

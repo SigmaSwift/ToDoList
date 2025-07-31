@@ -7,27 +7,22 @@
 
 import UIKit
 
-extension NoteListView: INoteListView {
-    func show(_ notes: [Note]) {
-        self.notes = notes
-        applySnapshot(notes: notes)
-    }
-}
-
 final class NoteListView: UIViewController {
     var presenter: INoteListPresenter?
     
-    private var tableView: UITableView = .init()
-    private let searchBar: SearchBar = .init()
-    private var footerView: UIView = .init()
-    private var totalLabel: UILabel = .init()
+    private let tableView: UITableView = .init()
+    private let searchBarView: SearchBarView = .init()
+    private let footerView: UIView = .init()
+    private let totalLabel: UILabel = .init()
+    private let blurView: UIVisualEffectView = .init()
+    private var contextMenuView: ContextMenuView = .init()
     
     private let footerViewHeight: CGFloat = 100
     
     private var notes: [Note] = []
     private var filteredNotes: [Note] = []
     
-    enum Section {
+    enum Section: Hashable {
         case main
     }
     
@@ -36,31 +31,34 @@ final class NoteListView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        presenter?.viewDidLoaded()
-        
         view.backgroundColor = DesignSystem.Color.primaryBlack
         tableView.backgroundColor = DesignSystem.Color.primaryBlack
         tableView.separatorColor = DesignSystem.Color.secondaryGray
         footerView.backgroundColor = DesignSystem.Color.primaryGray
         
+        totalLabel.textColor = DesignSystem.Color.primaryWhite
+        totalLabel.font = .systemFont(ofSize: 22)
+        
         configureHeader()
         configureTableView()
         configureDataSource()
         configureFooter()
+        
+        presenter?.viewDidLoaded()
     }
     
     private func configureHeader() {
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(searchBar)
+        searchBarView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchBarView)
         
         NSLayoutConstraint.activate([
-            searchBar.topAnchor.constraint(equalTo: view.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            searchBar.heightAnchor.constraint(equalToConstant: 180)
+            searchBarView.topAnchor.constraint(equalTo: view.topAnchor),
+            searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            searchBarView.heightAnchor.constraint(equalToConstant: 180)
         ])
         
-        searchBar.textDidChanged = { [weak self] input in
+        searchBarView.textDidChanged = { [weak self] input in
             guard let self else { return }
             
             if input.isEmpty {
@@ -108,14 +106,15 @@ final class NoteListView: UIViewController {
     
     private func configureTableView() {
         view.addSubview(tableView)
-        tableView.register(NoteCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(NoteCellView.self, forCellReuseIdentifier: "cell")
         tableView.delegate = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.separatorInset = .init(top: 10, left: 20, bottom: 10, right: 20)
         tableView.backgroundColor = .black
+        tableView.rowHeight = UITableView.automaticDimension
    
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            tableView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor),
             tableView.leftAnchor.constraint(equalTo: view.leftAnchor),
             tableView.rightAnchor.constraint(equalTo: view.rightAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -footerViewHeight)
@@ -127,10 +126,9 @@ final class NoteListView: UIViewController {
     
     private func configureDataSource() {
         dataSource = UITableViewDiffableDataSource<Section, Note>(tableView: tableView) { tableView, indexPath, note in
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? NoteCell else { return NoteCell() }
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? NoteCellView else { return NoteCellView() }
                     
             cell.configure(with: note)
-            cell.backgroundColor = DesignSystem.Color.primaryWhite
             
             return cell
         }
@@ -144,136 +142,71 @@ final class NoteListView: UIViewController {
     }
     
     private func showContextMenu(on note: Note) {
-        guard let superView = navigationController?.view else { return }
-        
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-        blurView.translatesAutoresizingMaskIntoConstraints = false
+        blurView.effect = UIBlurEffect(style: .dark)
         blurView.alpha = .zero
-        superView.addSubview(blurView)
+        blurView.frame = view.frame
+        view.addSubview(blurView)
         
-        NSLayoutConstraint.activate([
-            blurView.topAnchor.constraint(equalTo: superView.topAnchor),
-            blurView.leadingAnchor.constraint(equalTo: superView.leadingAnchor),
-            blurView.trailingAnchor.constraint(equalTo: superView.trailingAnchor),
-            blurView.bottomAnchor.constraint(equalTo: superView.bottomAnchor)
-        ])
-        
-        let contentView = blurView.contentView
-        
-        let contextMenuView = createContextMenu(
-            title: note.title ?? String(note.id),
-            description: note.todo,
-            date: note.date
-        )
         contextMenuView.translatesAutoresizingMaskIntoConstraints = false
-        contextMenuView.alpha = .zero
-        contentView.addSubview(contextMenuView)
-        
+        view.addSubview(contextMenuView)
+                        
+        contextMenuView.update(note)
+    
+        let padding: CGFloat = 20.0
         NSLayoutConstraint.activate([
-            contextMenuView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            contextMenuView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            contextMenuView.widthAnchor.constraint(equalToConstant: 320)
+            contextMenuView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            contextMenuView.widthAnchor.constraint(equalToConstant: view.frame.width),
+            contextMenuView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+            contextMenuView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding)
         ])
         
-        let alert = Alert()
-        alert.translatesAutoresizingMaskIntoConstraints = false
-        alert.alpha = .zero
-        alert.set(models: [
-            .init(text: "Edit", image: "square.and.pencil", action: .edit),
-            .init(text: "Share", image: "square.and.arrow.up", action: .share),
-            .init(text: "Delete", image: "trash.slash", action: .delete, tint: .red)
-        ])
-        
-        contentView.addSubview(alert)
-        
-        NSLayoutConstraint.activate([
-            alert.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            alert.topAnchor.constraint(equalTo: contextMenuView.bottomAnchor, constant: 20),
-            alert.widthAnchor.constraint(equalToConstant: 254)
-        ])
-        
-        UIView.animate(withDuration: 0.5, delay: 0) {
-            [ blurView, contextMenuView, alert ].forEach { $0.alpha = 1 }
-        }
-        
-        contentView.addGestureRecognizer(UITapGestureRecognizer(
-            target: self,
-            action: #selector(dismissContextMenu)
-        ))
-        
-        alert.didTap = { [weak self] action in
+        contextMenuView.alert.didTap = { [weak self] action in
             guard let self else { return }
             
             switch action {
             case .edit:
-                dismissContextMenu()
+                hideContextMenu()
                 presenter?.didTapOn(note, isEditable: true)
             case .delete:
+                hideContextMenu()
                 presenter?.delete(note.id)
             case .share:
                 // No need to implemeted
                 print("Share")
             }
         }
-    }
         
-    private func createContextMenu(
-        title: String,
-        description: String,
-        date: String
-    ) -> UIView {
-        let container = UIView()
-        container.layer.cornerRadius = 10
-        container.backgroundColor = UIColor.init(hex: "#272729")
+        blurView.addGestureRecognizer(UITapGestureRecognizer(
+            target: self,
+            action: #selector(hideContextMenu)
+        ))
         
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        
-        let descriptionLabel = UILabel()
-        descriptionLabel.text = description
-        
-        let dateLabel = UILabel()
-        dateLabel.text = date
-        
-        [ titleLabel, descriptionLabel, dateLabel ].forEach { $0.textColor = .white }
-        
-        let vStack = UIStackView(arrangedSubviews: [ titleLabel, descriptionLabel, dateLabel ])
-        vStack.axis = .vertical
-        vStack.spacing = 6
-        vStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        container.addSubview(vStack)
-        
-        let padding: CGFloat = 14
-        NSLayoutConstraint.activate([
-            vStack.topAnchor.constraint(equalTo: container.topAnchor, constant: padding),
-            vStack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: padding),
-            vStack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -padding),
-            vStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -padding)
-        ])
-        
-        return container
+        UIView.animate(withDuration: 0.25) { [weak self] in
+            guard let self else { return }
+            
+            [ blurView, contextMenuView ].forEach { $0.alpha = 1 }
+        }
     }
     
     // MARK: - Actions -
     
     @objc
     private func addNoteTapped() {
-        presenter?.addNote()
-    }
-    
-    private func didTap(_ note: Note, isEditable: Bool) {
-        presenter?.didTapOn(note, isEditable: isEditable)
+        presenter?.addNoteDidTap()
     }
     
     @objc
-    private func dismissContextMenu() {
-        if let blurView = navigationController?.view.subviews.last {
-            UIView.animate(withDuration: 0.15) {
-                blurView.alpha = 0
-            } completion: { _ in
-                blurView.removeFromSuperview()
-            }
+    private func hideContextMenu() {
+        UIView.animate(withDuration: 0.25) { [weak self] in
+            guard let self else { return }
+            
+            [ blurView, contextMenuView ].forEach { $0.alpha = 0 }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self else { return }
+            
+            [ blurView, contextMenuView ].forEach { $0.removeFromSuperview() }
         }
     }
     
@@ -293,9 +226,37 @@ final class NoteListView: UIViewController {
 extension NoteListView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let note = dataSource.itemIdentifier(for: indexPath) {
-            didTap(note, isEditable: false)
             tableView.deselectRow(at: indexPath, animated: true)
+            presenter?.didTapOn(note, isEditable: false)
         }
+    }
+}
+
+extension NoteListView: INoteListView {
+    func show(_ notes: [Note]) {
+        self.notes = notes
+        applySnapshot(notes: notes)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            totalLabel.text = "Notes: \(notes.count)"
+        }
+    }
+    
+    func updateNotesList(with note: Note) {
+        notes.append(note)
+        applySnapshot(notes: notes)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            totalLabel.text = "Notes: \(notes.count)"
+        }
+    }
+    
+    func dismissAlert() {
+        hideContextMenu()
     }
 }
 
@@ -308,5 +269,11 @@ struct DesignSystem {
         static let primaryBlack = UIColor(hex: "#040404")
         
         static let darkYellow = UIColor(hex: "#FED702")
+    }
+    
+    enum Font {
+        static let small: UIFont = .systemFont(ofSize: 22)
+        static let medium: UIFont = .systemFont(ofSize: 28)
+        static let large: UIFont = .systemFont(ofSize: 32)
     }
 }

@@ -7,6 +7,7 @@
 
 class NoteListRouter: INoteListRouter {
     weak var view: NoteListView?
+    weak var presenter: NoteListPresenter?
     
     func openDetails(with note: Note, isEditable: Bool) {
         let noteDetailsView = NoteDetailsModuleBuilder.build(note: note, isEditable: isEditable)
@@ -14,7 +15,7 @@ class NoteListRouter: INoteListRouter {
     }
     
     func presentAddNote(_ lastNoteId: Int, userId: Int) {
-        let addNoteView = AddNoteModuleBuilder.build(lastNoteId, userId: userId)
+        let addNoteView = AddNoteModuleBuilder.build(lastNoteId, userId: userId, moduleOutput: presenter)
         view?.present(addNoteView, animated: true)
     }
 }

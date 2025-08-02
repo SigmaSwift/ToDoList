@@ -223,6 +223,14 @@ extension NoteListView: UITableViewDelegate {
 }
 
 extension NoteListView: INoteListView {
+    func showAlert(_ title: String, body: String) {
+        let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
+        let action = UIAlertAction(title: "Ok", style: .default)
+        alert.addAction(action)
+        
+        present(alert, animated: true)
+    }
+    
     func show(_ notes: [Note]) {
         applySnapshot(notes: notes)
         self.totalLabel.text = "Notes: \(notes.count)"

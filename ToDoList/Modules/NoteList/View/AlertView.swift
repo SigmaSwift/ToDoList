@@ -34,7 +34,7 @@ class AlertView: UIView {
             label.textColor = model.tint ?? .black
             image.tintColor = model.tint ?? .black
             
-            let hStack = Stack(arrangedSubviews: [ label, image ])
+            let hStack = TappableStack(arrangedSubviews: [ label, image ])
             hStack.actionType = model.action
             hStack.didTap = { [weak self] type in
                 guard let self else { return }
@@ -77,7 +77,15 @@ class AlertView: UIView {
         ])
     }
     
-    private class Stack: UIStackView {
+    private func line() -> UIView {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        view.backgroundColor = .darkGray
+        return view
+    }
+    
+    private class TappableStack: UIStackView {
         var actionType: AlertModel.Action?
         var didTap: ((AlertModel.Action) -> Void)?
         
@@ -99,13 +107,5 @@ class AlertView: UIView {
             
             didTap?(actionType)
         }
-    }
-    
-    private func line() -> UIView {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        view.backgroundColor = .darkGray
-        return view
     }
 }

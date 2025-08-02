@@ -35,13 +35,14 @@ class NoteListPresenter {
 }
 
 extension NoteListPresenter: INoteListPresenter {
-    func viewDidLoaded() {
-        Task(priority: .background) {
-            try await interactor.loadList()
-        }
+    func sendError(with title: String, body: String) {
+        view?.showAlert(title, body: body)
     }
     
-    @MainActor
+    func viewDidLoaded() {
+        interactor.loadList()
+    }
+    
     func didLoad(_ notes: [Note]) {
         self.notes = notes
         view?.show(notes)

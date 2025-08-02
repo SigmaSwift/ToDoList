@@ -8,6 +8,6 @@
 import Foundation
 
 protocol INoteService {
-    func fetchNotes() async throws -> [Note]
+    func fetchNotes(completion: @escaping (Result<[Note], HTTPError>) -> Void)
 }
 

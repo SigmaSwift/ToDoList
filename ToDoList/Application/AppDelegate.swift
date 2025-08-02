@@ -27,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let container = NSPersistentContainer(name: "CoreDataModel")
         container.loadPersistentStores { description, error in
             if let error {
-                fatalError("Unresolved \(error)")
+                debugPrint("Unresolved \(error)")
             } else {
                 debugPrint("DB path -> \(description.url?.absoluteString ?? "No DB URL")")
             }

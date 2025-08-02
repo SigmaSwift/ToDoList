@@ -7,8 +7,8 @@
 
 import UIKit
 
-class NoteDetailsView: UIViewController {
-    weak var presenter: INoteDetailsPresenter?
+class NoteDetailsView: UIViewController, UITextFieldDelegate {
+    var presenter: INoteDetailsPresenter?
     
     private let header: UILabel = .init()
     private let textField: UITextField = .init()
@@ -16,58 +16,25 @@ class NoteDetailsView: UIViewController {
     private let textView: UITextView = .init()
     private let checkmarkView: UIButton = .init()
     
+    private var completed: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setup()
+        presenter?.viewDidLoaded()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        presenter?.saveState()
-    }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
     
-    func set(_ note: Note, isEditable: Bool) {
-        header.text = isEditable ? "Edit mode" : "Details"
-        
-        textField.text = "\(note.id)"
-        dateLabel.text = note.date.description
-        textView.text = note.todo
-        
-        textView.isEditable = isEditable
-        textField.isEnabled = isEditable
-        checkmarkView.isEnabled = isEditable
-        
-        let image = note.completed ? UIImage(named: "done-circle") : UIImage(named: "empty-circle")
-        isCompleted = note.completed
-        checkmarkView.setImage(image, for: .normal)
-        
-        
-        if isEditable {
-            textField.becomeFirstResponder()
-        }
-    }
-    
-    private var isCompleted: Bool = false
-    
-    @objc
-    private func completedButtonTap(_ sender: UIButton) {
-        isCompleted = !isCompleted
-        let image = isCompleted ? UIImage(named: "done-circle") : UIImage(named: "empty-circle")
-        sender.setImage(image, for: .normal)
+        presenter?.updatNoteIfNeeded(textField.text ?? "", body: textView.text ?? "", completed: completed)
     }
     
     private func setup() {
         view.backgroundColor = DesignSystem.Color.primaryBlack
         
-        checkmarkView.addTarget(self, action: #selector(completedButtonTap(_:)), for: .touchUpInside)
-
-        
-        let vStack = UIStackView(arrangedSubviews: [
-            checkmarkView, textField, dateLabel, textView
-        ])
+        let vStack = UIStackView(arrangedSubviews: [ checkmarkView, textField, dateLabel, textView ])
         vStack.axis = .vertical
         vStack.spacing = 10
         vStack.setCustomSpacing(5, after: textField)
@@ -76,6 +43,7 @@ class NoteDetailsView: UIViewController {
         header.font = .boldSystemFont(ofSize: 32)
         
         dateLabel.textColor = DesignSystem.Color.primaryWhite
+        checkmarkView.addTarget(self, action: #selector(completedButtonTap(_:)), for: .touchUpInside)
         
         textField.backgroundColor = DesignSystem.Color.primaryGray
         textField.textColor = DesignSystem.Color.primaryWhite
@@ -88,10 +56,8 @@ class NoteDetailsView: UIViewController {
         textView.layer.borderColor = DesignSystem.Color.secondaryGray?.cgColor
         textView.layer.borderWidth = 2
         textView.layer.cornerRadius = 5
-                
-        header.translatesAutoresizingMaskIntoConstraints = false
-        vStack.translatesAutoresizingMaskIntoConstraints = false
-        checkmarkView.translatesAutoresizingMaskIntoConstraints = false
+        
+        [ header, vStack, checkmarkView ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         view.addSubview(vStack)
         view.addSubview(header)
@@ -110,6 +76,35 @@ class NoteDetailsView: UIViewController {
             vStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -padding)
         ])
     }
+    
+    private func image(for completed: Bool) -> UIImage? {
+        completed ? UIImage(named: "done-circle") : UIImage(named: "empty-circle")
+    }
+    
+    @objc
+    private func completedButtonTap(_ sender: UIButton) {
+        completed = !completed
+        
+        sender.setImage(image(for: completed), for: .normal)
+    }
 }
 
-extension NoteDetailsView: INoteDetailsView { }
+extension NoteDetailsView: INoteDetailsView {
+    func configure(with note: Note, screenTitle: String, isEditable: Bool) {
+        header.text = screenTitle
+                
+        textField.text = note.title ?? "\(note.id)"
+        dateLabel.text = note.date?.description
+        textView.text = note.todo
+        completed = note.completed
+        checkmarkView.setImage(image(for: note.completed), for: .normal)
+                
+        textView.isSelectable = isEditable
+        textField.isEnabled = isEditable
+        checkmarkView.isEnabled = isEditable
+        
+        if isEditable {
+            textField.becomeFirstResponder()
+        }
+    }
+}

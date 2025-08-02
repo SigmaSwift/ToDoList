@@ -7,20 +7,12 @@
 
 import Foundation
 
-protocol IAddNoteView: AnyObject {
-    func showAlert(with title: String, body: String)
-    func dismiss()
-}
-
 protocol IAddNotePresenter: AnyObject {
-    func save(_ note: Note)
-    func show(title: String, error description: String)
-    func dismiss()
-    func addedNote(_ note: Note)
+    func addNote(with title: String, and body: String)
 }
 
-protocol IAddNoteInteractor: AnyObject {
-    func saveIntoDatabase(_ note: Note)
-}
+protocol IAddNoteView: AnyObject {}
+
+protocol IAddNoteInteractor: AnyObject { }
 
 protocol IAddNoteRouter: AnyObject { }

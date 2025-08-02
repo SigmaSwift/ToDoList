@@ -12,15 +12,11 @@ final class NoteListView: UIViewController {
     
     private let tableView: UITableView = .init()
     private let searchBarView: SearchBarView = .init()
-    private let footerView: UIView = .init()
     private let totalLabel: UILabel = .init()
     private let blurView: UIVisualEffectView = .init()
     private var contextMenuView: ContextMenuView = .init()
     
     private let footerViewHeight: CGFloat = 100
-    
-    private var notes: [Note] = []
-    private var filteredNotes: [Note] = []
     
     enum Section: Hashable {
         case main
@@ -30,15 +26,7 @@ final class NoteListView: UIViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = DesignSystem.Color.primaryBlack
-        tableView.backgroundColor = DesignSystem.Color.primaryBlack
-        tableView.separatorColor = DesignSystem.Color.secondaryGray
-        footerView.backgroundColor = DesignSystem.Color.primaryGray
-        
-        totalLabel.textColor = DesignSystem.Color.primaryWhite
-        totalLabel.font = .systemFont(ofSize: 22)
-        
+                
         configureHeader()
         configureTableView()
         configureDataSource()
@@ -46,7 +34,7 @@ final class NoteListView: UIViewController {
         
         presenter?.viewDidLoaded()
     }
-    
+        
     private func configureHeader() {
         searchBarView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchBarView)
@@ -61,12 +49,7 @@ final class NoteListView: UIViewController {
         searchBarView.textDidChanged = { [weak self] input in
             guard let self else { return }
             
-            if input.isEmpty {
-                applySnapshot(notes: notes, animatingDifferences: true)
-            } else {
-                let filteredNotes = notes.filter { $0.todo.lowercased().contains(input.lowercased()) }
-                applySnapshot(notes: filteredNotes, animatingDifferences: true)
-            }
+            presenter?.filterNotes(with: input)
         }
     }
     
@@ -75,16 +58,19 @@ final class NoteListView: UIViewController {
         addNoteButton.setImage(.init(systemName: "square.and.pencil"), for: .normal)
         addNoteButton.tintColor = DesignSystem.Color.darkYellow
         addNoteButton.addTarget(self, action: #selector(addNoteTapped), for: .touchUpInside)
-        let spacer = UIView()
         
-        let hStack = UIStackView()
+        totalLabel.textColor = DesignSystem.Color.primaryWhite
+        totalLabel.font = .systemFont(ofSize: 22)
+        
+        let spacer = UIView()
+        let hStack = UIStackView(arrangedSubviews: [ spacer, totalLabel, addNoteButton ])
         hStack.axis = .horizontal
         hStack.distribution = .equalCentering
-        hStack.addArrangedSubview(spacer)
-        hStack.addArrangedSubview(totalLabel)
-        hStack.addArrangedSubview(addNoteButton)
-               
+        
+        let footerView = UIView()
+        footerView.backgroundColor = DesignSystem.Color.primaryGray
         footerView.addSubview(hStack)
+        
         view.addSubview(footerView)
         
         [ footerView, hStack ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
@@ -102,16 +88,21 @@ final class NoteListView: UIViewController {
         ])
     }
     
-    // MARK: - Table view -
-    
+        
     private func configureTableView() {
-        view.addSubview(tableView)
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(sender:)))
+        
         tableView.register(NoteCellView.self, forCellReuseIdentifier: "cell")
         tableView.delegate = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.separatorInset = .init(top: 10, left: 20, bottom: 10, right: 20)
-        tableView.backgroundColor = .black
+        tableView.backgroundColor = DesignSystem.Color.primaryBlack
+        tableView.separatorColor = DesignSystem.Color.secondaryGray
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.addGestureRecognizer(longPress)
+        
+        
+        view.addSubview(tableView)
    
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor),
@@ -119,10 +110,9 @@ final class NoteListView: UIViewController {
             tableView.rightAnchor.constraint(equalTo: view.rightAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -footerViewHeight)
         ])
-        
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(sender:)))
-        tableView.addGestureRecognizer(longPress)
     }
+    
+    //MARK: - Table view DataSource and Snapshot -
     
     private func configureDataSource() {
         dataSource = UITableViewDiffableDataSource<Section, Note>(tableView: tableView) { tableView, indexPath, note in
@@ -154,10 +144,10 @@ final class NoteListView: UIViewController {
     
         let padding: CGFloat = 20.0
         NSLayoutConstraint.activate([
-            contextMenuView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            contextMenuView.widthAnchor.constraint(equalToConstant: view.frame.width),
-            contextMenuView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            contextMenuView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding)
+            contextMenuView.topAnchor.constraint(equalTo: view.centerYAnchor, constant: -padding),
+            contextMenuView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contextMenuView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contextMenuView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
         
         contextMenuView.alert.didTap = { [weak self] action in
@@ -165,11 +155,11 @@ final class NoteListView: UIViewController {
             
             switch action {
             case .edit:
-                hideContextMenu()
                 presenter?.didTapOn(note, isEditable: true)
-            case .delete:
                 hideContextMenu()
+            case .delete:
                 presenter?.delete(note.id)
+                hideContextMenu()
             case .share:
                 // No need to implemeted
                 print("Share")
@@ -234,29 +224,13 @@ extension NoteListView: UITableViewDelegate {
 
 extension NoteListView: INoteListView {
     func show(_ notes: [Note]) {
-        self.notes = notes
         applySnapshot(notes: notes)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            
-            totalLabel.text = "Notes: \(notes.count)"
-        }
+        self.totalLabel.text = "Notes: \(notes.count)"
     }
     
-    func updateNotesList(with note: Note) {
-        notes.append(note)
-        applySnapshot(notes: notes)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            
-            totalLabel.text = "Notes: \(notes.count)"
-        }
-    }
-    
-    func dismissAlert() {
-        hideContextMenu()
+    func update(_ notes: [Note]) {
+        applySnapshot(notes: notes, animatingDifferences: true)
+        self.totalLabel.text = "Notes: \(notes.count)"
     }
 }
 
@@ -269,11 +243,5 @@ struct DesignSystem {
         static let primaryBlack = UIColor(hex: "#040404")
         
         static let darkYellow = UIColor(hex: "#FED702")
-    }
-    
-    enum Font {
-        static let small: UIFont = .systemFont(ofSize: 22)
-        static let medium: UIFont = .systemFont(ofSize: 28)
-        static let large: UIFont = .systemFont(ofSize: 32)
     }
 }

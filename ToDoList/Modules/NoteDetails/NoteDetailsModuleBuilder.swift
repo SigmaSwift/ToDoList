@@ -8,20 +8,14 @@
 import Foundation
 
 class NoteDetailsModuleBuilder {
-    static func build(note: Note, isEditable: Bool) -> NoteDetailsView {
+    static func build(note: Note, isEditable: Bool, output: INoteDetailsModuleOutput?) -> NoteDetailsView {
         let view = NoteDetailsView()
-        view.set(note, isEditable: isEditable)
-        
-        let interactor = NoteDetailsInteractor()
-        let router = NoteDetailsRouter()
-        let presenter = NoteDetailsPresenter()
+        let presenter = NoteDetailsPresenter(note: note, isEditable: isEditable)
         
         view.presenter = presenter
-        interactor.presenter = presenter
-        
-        router.view = view
         presenter.view = view
-        
+        presenter.output = output
+    
         return view
     }
 }

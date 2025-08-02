@@ -30,6 +30,7 @@ final class NoteCellView: UITableViewCell {
     
     private func setup() {
         backgroundColor = DesignSystem.Color.primaryWhite
+        selectionStyle = .none
         
         vStack.axis = .vertical
         vStack.spacing = 4

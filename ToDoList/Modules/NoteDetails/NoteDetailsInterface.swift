@@ -7,12 +7,11 @@
 
 import Foundation
 
-protocol INoteDetailsView: AnyObject {}
-
-protocol INoteDetailsPresenter: AnyObject {
-    func saveState()
+protocol INoteDetailsView: AnyObject {
+    func configure(with note: Note, screenTitle: String, isEditable: Bool)
 }
 
-protocol INoteDetailsInteractor: AnyObject {}
-
-protocol INoteDetailsRouter: AnyObject {}
+protocol INoteDetailsPresenter: AnyObject {
+    func viewDidLoaded()
+    func updatNoteIfNeeded(_ title: String, body: String, completed: Bool)
+}

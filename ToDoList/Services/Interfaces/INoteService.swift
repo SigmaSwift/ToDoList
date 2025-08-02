@@ -8,7 +8,6 @@
 import Foundation
 
 protocol INoteService {
-    func getData() async throws -> ToDos
-    func getNotes() async throws -> [Note]
+    func fetchNotes() async throws -> [Note]
 }
 

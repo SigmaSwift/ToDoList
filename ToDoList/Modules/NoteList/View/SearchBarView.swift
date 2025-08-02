@@ -12,7 +12,7 @@ final class SearchBarView: UIView {
     
     private let titleLabel: UILabel = .init()
     private let textField: UITextField = .init()
-    private let icon: UIImageView = .init()
+    private let iconView: UIImageView = .init()
     private let clearButton: UIButton = .init()
     private let cancelButton: UIButton = .init()
     
@@ -37,8 +37,8 @@ final class SearchBarView: UIView {
         titleLabel.textColor = DesignSystem.Color.primaryWhite
         titleLabel.font = .boldSystemFont(ofSize: 34)
         
-        icon.image = UIImage(systemName: "magnifyingglass")
-        icon.tintColor = DesignSystem.Color.secondaryGray
+        iconView.image = UIImage(systemName: "magnifyingglass")
+        iconView.tintColor = DesignSystem.Color.secondaryGray
         
         let attributedPlaceholder = NSAttributedString(
             string: "Search",
@@ -67,13 +67,13 @@ final class SearchBarView: UIView {
             mainContainer,
             searchBarContainer,
             titleLabel,
-            icon,
+            iconView,
             textField,
             clearButton,
             cancelButton
         ].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
     
-        [ icon, textField, clearButton ].forEach { searchBarContainer.addSubview($0) }
+        [ iconView, textField, clearButton ].forEach { searchBarContainer.addSubview($0) }
         [ titleLabel, searchBarContainer, cancelButton ].forEach { mainContainer.addSubview($0) }
         
         searchContainerTrailingConstraint = searchBarContainer.trailingAnchor.constraint(
@@ -84,8 +84,8 @@ final class SearchBarView: UIView {
         
         let iconSize: CGFloat = 24.0
         NSLayoutConstraint.activate([
-            icon.widthAnchor.constraint(equalToConstant: iconSize),
-            icon.heightAnchor.constraint(equalToConstant: iconSize),
+            iconView.widthAnchor.constraint(equalToConstant: iconSize),
+            iconView.heightAnchor.constraint(equalToConstant: iconSize),
             
             clearButton.heightAnchor.constraint(equalToConstant: iconSize),
             clearButton.widthAnchor.constraint(equalToConstant: iconSize),
@@ -98,10 +98,10 @@ final class SearchBarView: UIView {
             
             searchBarContainer.heightAnchor.constraint(equalToConstant: 36),
             
-            icon.leadingAnchor.constraint(equalTo: searchBarContainer.leadingAnchor, constant: padding / 2),
-            icon.centerYAnchor.constraint(equalTo: searchBarContainer.centerYAnchor),
+            iconView.leadingAnchor.constraint(equalTo: searchBarContainer.leadingAnchor, constant: padding / 2),
+            iconView.centerYAnchor.constraint(equalTo: searchBarContainer.centerYAnchor),
             
-            textField.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: padding),
+            textField.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: padding),
             textField.centerYAnchor.constraint(equalTo: searchBarContainer.centerYAnchor),
             textField.trailingAnchor.constraint(equalTo: clearButton.leadingAnchor),
             

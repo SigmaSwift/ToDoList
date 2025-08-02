@@ -13,9 +13,6 @@ class AddNoteView: UIViewController {
     private let titleField: UITextField = .init()
     private let descriptionView: UITextView = .init()
     
-    var lastNoteId: Int?
-    var userId: Int?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -82,33 +79,11 @@ class AddNoteView: UIViewController {
     
     @objc
     private func saveButtonTapped() {
-        guard
-            let lastNoteId, let userId,
-            titleField.hasText, descriptionView.hasText
-        else { return }
+        guard titleField.hasText, descriptionView.hasText else { return }
         
-        let newNote = Note(
-            id: lastNoteId + 1,
-            title: titleField.text,
-            todo: descriptionView.text,
-            completed: false,
-            userId: userId
-        )
-        
-        presenter?.save(newNote)
-    }
-}
-
-extension AddNoteView: IAddNoteView {
-    func showAlert(with title: String, body: String) {
-        let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "Ok", style: .default)
-        alert.addAction(okAction)
-        
-        present(alert, animated: true)
-    }
-    
-    func dismiss() {
+        presenter?.addNote(with: titleField.text!, and: descriptionView.text!)
         dismiss(animated: true)
     }
 }
+
+extension AddNoteView: IAddNoteView { }

@@ -8,14 +8,9 @@
 import Foundation
 
 protocol ICoreDataManager {
-    func save(notes: [Note]) throws
-    func save(note: Note) throws
     func fetchNotes() throws -> [Note]
-    func updateNote(
-        with id: Int,
-        title: String,
-        description: String,
-        isCompleted: Bool
-    ) throws
+    func save(_ note: Note) throws
+    func save(notes: [Note]) throws
+    func update(_ note: Note) throws
     func deleteNote(with id: Int) throws
 }

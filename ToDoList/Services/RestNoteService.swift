@@ -8,7 +8,7 @@
 import Foundation
 
 class RestNoteService: INoteService {
-    func getData() async throws -> ToDos {
+    private func getData() async throws -> ToDos {
         guard let endpoint: URL = .init(string: "https://dummyjson.com/todos") else {
             throw HTTPError.invalidURL
         }
@@ -26,7 +26,7 @@ class RestNoteService: INoteService {
         }
     }
     
-    func getNotes() async throws -> [Note] {
+    func fetchNotes() async throws -> [Note] {
         do {
             let todos = try await getData()
             return todos.todos

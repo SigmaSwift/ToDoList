@@ -28,7 +28,8 @@ final class CoreDataManager: ICoreDataManager {
                 title: entity.title,
                 todo: entity.todo ?? "fstan",
                 completed: entity.completed,
-                userId: Int(entity.userId)
+                userId: Int(entity.userId),
+                date: entity.date?.toString()
             )
         }
     }
@@ -41,43 +42,58 @@ final class CoreDataManager: ICoreDataManager {
             noteEntity.todo = note.todo
             noteEntity.completed = note.completed
             noteEntity.userId = Int64(note.userId)
-            noteEntity.date = Date.now // need to fix
+            noteEntity.date = note.date?.toDate()
         }
         try context.save()
     }
     
-    func save(note: Note) throws {
+    func save(_ note: Note) throws {
         let noteEntity = NoteEntity(context: context)
         noteEntity.id = Int64(note.id)
         noteEntity.title = note.title
         noteEntity.todo = note.todo
         noteEntity.completed = note.completed
         noteEntity.userId = Int64(note.userId)
-        noteEntity.date = Date.now // need to fix
+        noteEntity.date = Date.now
+        
         try context.save()
     }
     
-    func updateNote(with id: Int, title: String, description: String, isCompleted: Bool) throws {
+    func update(_ note: Note) throws {
         let fetchRequest = NSFetchRequest<NoteEntity>(entityName: "NoteEntity")
-        fetchRequest.predicate = NSPredicate(format: "id == %d", id)
+        fetchRequest.predicate = NSPredicate(format: "id == %d", note.id)
         
-        let results = try context.fetch(fetchRequest)
-        
-        guard let noteEntity = results.first else { return }
-        
-        noteEntity.title = title
-        noteEntity.todo = description
-        noteEntity.completed = isCompleted
-        noteEntity.date = Date.now
-        try context.save()
+        if let noteEntity = try context.fetch(fetchRequest).first {
+            noteEntity.title = note.title
+            noteEntity.todo = note.todo
+            noteEntity.completed = note.completed
+            try context.save()
+        }
     }
     
     func deleteNote(with id: Int) throws {
         let fetchRequest = NSFetchRequest<NoteEntity>(entityName: "NoteEntity")
-        
         fetchRequest.predicate = NSPredicate(format: "id == %d", id)
+        
         let results = try context.fetch(fetchRequest)
         results.forEach { context.delete($0) }
         try context.save()
+    }
+}
+
+
+extension String {
+    func toDate() -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yy"
+        return formatter.date(from: self)
+    }
+}
+
+extension Date {
+    func toString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yy"
+        return formatter.string(from: self)
     }
 }

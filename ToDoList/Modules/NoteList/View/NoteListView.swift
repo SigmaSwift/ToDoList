@@ -8,15 +8,16 @@
 import UIKit
 
 final class NoteListView: UIViewController {
-    var presenter: INoteListPresenter?
+    private let designSystem: DesignSystem = AppDesignSystem()
     
     private let tableView: UITableView = .init()
     private let searchBarView: SearchBarView = .init()
     private let totalLabel: UILabel = .init()
     private let blurView: UIVisualEffectView = .init()
     private var contextMenuView: ContextMenuView = .init()
+    private let footerViewHeight: CGFloat = 100.0
     
-    private let footerViewHeight: CGFloat = 100
+    var presenter: INoteListPresenter?
     
     enum Section: Hashable {
         case main
@@ -56,11 +57,11 @@ final class NoteListView: UIViewController {
     private func configureFooter() {
         let addNoteButton = UIButton(type: .system)
         addNoteButton.setImage(.init(systemName: "square.and.pencil"), for: .normal)
-        addNoteButton.tintColor = DesignSystem.Color.darkYellow
+        addNoteButton.tintColor = designSystem.color(.darkYellow)
         addNoteButton.addTarget(self, action: #selector(addNoteTapped), for: .touchUpInside)
         
-        totalLabel.textColor = DesignSystem.Color.primaryWhite
-        totalLabel.font = .systemFont(ofSize: 22)
+        totalLabel.textColor = designSystem.color(.primaryWhite)
+        totalLabel.font = designSystem.font(.custom(22, false))
         
         let spacer = UIView()
         let hStack = UIStackView(arrangedSubviews: [ spacer, totalLabel, addNoteButton ])
@@ -68,7 +69,7 @@ final class NoteListView: UIViewController {
         hStack.distribution = .equalCentering
         
         let footerView = UIView()
-        footerView.backgroundColor = DesignSystem.Color.primaryGray
+        footerView.backgroundColor = designSystem.color(.primaryGray)
         footerView.addSubview(hStack)
         
         view.addSubview(footerView)
@@ -96,8 +97,8 @@ final class NoteListView: UIViewController {
         tableView.delegate = self
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.separatorInset = .init(top: 10, left: 20, bottom: 10, right: 20)
-        tableView.backgroundColor = DesignSystem.Color.primaryBlack
-        tableView.separatorColor = DesignSystem.Color.secondaryGray
+        tableView.backgroundColor = designSystem.color(.primaryBlack)
+        tableView.separatorColor = designSystem.color(.secondaryGray)
         tableView.rowHeight = UITableView.automaticDimension
         tableView.addGestureRecognizer(longPress)
         
@@ -239,17 +240,5 @@ extension NoteListView: INoteListView {
     func update(_ notes: [Note]) {
         applySnapshot(notes: notes, animatingDifferences: true)
         self.totalLabel.text = "Notes: \(notes.count)"
-    }
-}
-
-struct DesignSystem {
-    enum Color {
-        static let primaryGray = UIColor(hex: "#272729")
-        static let secondaryGray = UIColor(hex: "#4D555E")
-        
-        static let primaryWhite = UIColor(hex: "#F4F4F4")
-        static let primaryBlack = UIColor(hex: "#040404")
-        
-        static let darkYellow = UIColor(hex: "#FED702")
     }
 }

@@ -8,6 +8,8 @@
 import UIKit
 
 final class NoteCellView: UITableViewCell {
+    private let designSystem: DesignSystem = AppDesignSystem()
+    
     private let titleLabel: UILabel = .init()
     private let descriptionLabel: UILabel = .init()
     private let dateLabel: UILabel = .init()
@@ -29,7 +31,6 @@ final class NoteCellView: UITableViewCell {
     }
     
     private func setup() {
-        backgroundColor = DesignSystem.Color.primaryWhite
         selectionStyle = .none
         
         vStack.axis = .vertical
@@ -63,14 +64,14 @@ final class NoteCellView: UITableViewCell {
     
     func configure(with note: Note) {
         let tintColor: UIColor?
-        let secondaryGray = DesignSystem.Color.secondaryGray
+        let secondaryGray = designSystem.color(.secondaryGray)
         if note.completed {
             tintColor = secondaryGray
             
             checkmarkView.image = UIImage(named: "done-circle")
             titleLabel.setStrikethroughText(note.title ?? String(note.id), tintColor)
         } else {
-            tintColor = DesignSystem.Color.primaryWhite
+            tintColor = designSystem.color(.primaryWhite)
             
             checkmarkView.image = UIImage(named: "empty-circle")
             titleLabel.attributedText = nil

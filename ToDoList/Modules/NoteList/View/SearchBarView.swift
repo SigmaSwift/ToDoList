@@ -8,8 +8,9 @@
 import UIKit
 
 final class SearchBarView: UIView {
-    private let searchBarContainer: UIView = .init()
+    private let designSystem: DesignSystem = AppDesignSystem()
     
+    private let searchBarContainer: UIView = .init()
     private let titleLabel: UILabel = .init()
     private let textField: UITextField = .init()
     private let iconView: UIImageView = .init()
@@ -33,24 +34,27 @@ final class SearchBarView: UIView {
     }
     
     private func setup() {
+        let secondaryGray = designSystem.color(.secondaryGray)
+        let primaryWhite = designSystem.color(.primaryWhite)
+        
         titleLabel.text = "Todos"
-        titleLabel.textColor = DesignSystem.Color.primaryWhite
+        titleLabel.textColor = primaryWhite
         titleLabel.font = .boldSystemFont(ofSize: 34)
         
         iconView.image = UIImage(systemName: "magnifyingglass")
-        iconView.tintColor = DesignSystem.Color.secondaryGray
+        iconView.tintColor = secondaryGray
         
         let attributedPlaceholder = NSAttributedString(
             string: "Search",
-            attributes: [.foregroundColor: DesignSystem.Color.secondaryGray ?? .black]
+            attributes: [.foregroundColor: secondaryGray]
         )
         textField.attributedPlaceholder = attributedPlaceholder
-        textField.textColor = DesignSystem.Color.primaryWhite
+        textField.textColor = primaryWhite
         textField.addTarget(self, action: #selector(textFieldEditingChanged), for: .editingChanged)
         textField.delegate = self
         
         clearButton.setImage(.init(systemName: "xmark.circle.fill"), for: .normal)
-        clearButton.tintColor = DesignSystem.Color.secondaryGray
+        clearButton.tintColor = secondaryGray
         clearButton.addTarget(self, action: #selector(clearButtonTapped), for: .touchUpInside)
         clearButton.isHidden = true
         
@@ -59,7 +63,7 @@ final class SearchBarView: UIView {
         cancelButton.isHidden = true
         
         searchBarContainer.layer.cornerRadius = 10
-        searchBarContainer.backgroundColor = DesignSystem.Color.primaryGray
+        searchBarContainer.backgroundColor = designSystem.color(.primaryGray)
         
         let mainContainer = UIView()
         

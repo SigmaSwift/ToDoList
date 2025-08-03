@@ -7,6 +7,10 @@
 
 import Foundation
 
+protocol INoteService {
+    func fetchNotes(completion: @escaping (Result<[Note], HTTPError>) -> Void)
+}
+
 class RestNoteService: INoteService {
     private func getData(completion: @escaping (Result<ToDos, HTTPError>) -> Void) {
         guard let endpoint: URL = .init(string: "https://dummyjson.com/todos") else {

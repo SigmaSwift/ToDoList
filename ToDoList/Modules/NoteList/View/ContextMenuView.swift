@@ -9,6 +9,8 @@ import UIKit
 import Foundation
 
 final class ContextMenuView: UIView {
+    private let designSystem: DesignSystem = AppDesignSystem()
+    
     private var title: String?
     private var body: String?
     private var date: String?
@@ -59,6 +61,8 @@ final class ContextMenuView: UIView {
     }
     
     private class PopupView: UIView {
+        private let designSystem: DesignSystem = AppDesignSystem()
+        
         private let titleLabel: UILabel = .init()
         private let descriptionLabel: UILabel = .init()
         private let dateLabel: UILabel = .init()
@@ -82,19 +86,19 @@ final class ContextMenuView: UIView {
         }
         
         private func setup() {
-            let primaryTextColor = DesignSystem.Color.primaryWhite
-            let secondaryTextColor = DesignSystem.Color.secondaryGray
+            let primaryTextColor = designSystem.color(.primaryWhite)
+            let secondaryTextColor = designSystem.color(.secondaryGray)
             
-            backgroundColor = DesignSystem.Color.primaryGray
+            backgroundColor = designSystem.color(.primaryGray)
             layer.cornerRadius = 10
             
             titleLabel.numberOfLines = 1
             titleLabel.textColor = primaryTextColor
-            titleLabel.font = .boldSystemFont(ofSize: 21)
+            titleLabel.font = designSystem.font(.custom(21, false))
             
             descriptionLabel.numberOfLines = 0
             descriptionLabel.textColor = primaryTextColor
-            descriptionLabel.font = .boldSystemFont(ofSize: 18)
+            descriptionLabel.font = designSystem.font(.custom(18, true))
             
             dateLabel.numberOfLines = 1
             dateLabel.textColor = secondaryTextColor

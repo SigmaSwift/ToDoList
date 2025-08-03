@@ -9,6 +9,7 @@ import UIKit
 
 class NoteDetailsView: UIViewController, UITextFieldDelegate {
     var presenter: INoteDetailsPresenter?
+    var designSystem: DesignSystem!
     
     private let header: UILabel = .init()
     private let textField: UITextField = .init()
@@ -32,28 +33,29 @@ class NoteDetailsView: UIViewController, UITextFieldDelegate {
     }
     
     private func setup() {
-        view.backgroundColor = DesignSystem.Color.primaryBlack
+        view.backgroundColor = designSystem.color(.primaryBlack)
         
         let vStack = UIStackView(arrangedSubviews: [ checkmarkView, textField, dateLabel, textView ])
         vStack.axis = .vertical
         vStack.spacing = 10
         vStack.setCustomSpacing(5, after: textField)
         
-        header.textColor = DesignSystem.Color.primaryWhite
-        header.font = .boldSystemFont(ofSize: 32)
+        let textColor = designSystem.color(.primaryWhite)
+        header.textColor = textColor
+        header.font = designSystem.font(.large)
         
-        dateLabel.textColor = DesignSystem.Color.primaryWhite
+        dateLabel.textColor = textColor
         checkmarkView.addTarget(self, action: #selector(completedButtonTap(_:)), for: .touchUpInside)
         
-        textField.backgroundColor = DesignSystem.Color.primaryGray
-        textField.textColor = DesignSystem.Color.primaryWhite
-        textField.font = .systemFont(ofSize: 27)
+        textField.backgroundColor = designSystem.color(.primaryGray)
+        textField.textColor = textColor
+        textField.font = designSystem.font(.custom(27, false))
         textField.borderStyle = .roundedRect
         
-        textView.backgroundColor = DesignSystem.Color.primaryGray
-        textView.textColor = DesignSystem.Color.primaryWhite
-        textView.font = .systemFont(ofSize: 22)
-        textView.layer.borderColor = DesignSystem.Color.secondaryGray?.cgColor
+        textView.backgroundColor = designSystem.color(.primaryGray)
+        textView.textColor = textColor
+        textView.font = designSystem.font(.custom(22, false))
+        textView.layer.borderColor = designSystem.color(.secondaryGray).cgColor
         textView.layer.borderWidth = 2
         textView.layer.cornerRadius = 5
         

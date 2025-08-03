@@ -8,6 +8,14 @@
 import CoreData
 import UIKit
 
+protocol ICoreDataManager {
+    func fetchNotes() throws -> [Note]
+    func save(_ note: Note) throws
+    func save(notes: [Note]) throws
+    func update(_ note: Note) throws
+    func deleteNote(with id: Int) throws
+}
+
 final class CoreDataManager: ICoreDataManager {
     private let container: NSPersistentContainer
     private var context: NSManagedObjectContext {
@@ -78,22 +86,5 @@ final class CoreDataManager: ICoreDataManager {
         let results = try context.fetch(fetchRequest)
         results.forEach { context.delete($0) }
         try context.save()
-    }
-}
-
-
-extension String {
-    func toDate() -> Date? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yy"
-        return formatter.date(from: self)
-    }
-}
-
-extension Date {
-    func toString() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yy"
-        return formatter.string(from: self)
     }
 }

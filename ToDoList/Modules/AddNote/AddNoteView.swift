@@ -8,10 +8,11 @@
 import UIKit
 
 class AddNoteView: UIViewController {
-    var presenter: IAddNotePresenter?
-    
+    private let designSystem: DesignSystem = AppDesignSystem()
     private let titleField: UITextField = .init()
     private let descriptionView: UITextView = .init()
+    
+    var presenter: IAddNotePresenter?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,12 +27,13 @@ class AddNoteView: UIViewController {
     }
     
     private func setup() {
-        view.backgroundColor = DesignSystem.Color.primaryBlack
+        view.backgroundColor = designSystem.color(.primaryBlack)
         
+        let textColor = designSystem.color(.primaryWhite)
         let titleLabel = UILabel()
         titleLabel.text = "Add note"
-        titleLabel.font = .boldSystemFont(ofSize: 24)
-        titleLabel.textColor = DesignSystem.Color.primaryWhite
+        titleLabel.font = designSystem.font(.custom(24, true))
+        titleLabel.textColor = textColor
         
         let closeButton = UIButton()
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
@@ -53,8 +55,9 @@ class AddNoteView: UIViewController {
         descriptionView.layer.borderWidth = 2
         descriptionView.layer.cornerRadius = 5
         descriptionView.backgroundColor = .black
-        descriptionView.textColor = DesignSystem.Color.primaryWhite
-        descriptionView.font = .systemFont(ofSize: 24)
+        descriptionView.textColor = textColor
+        descriptionView.textColor = textColor
+        descriptionView.font = designSystem.font(.custom(24, true))
         
         let vStack = UIStackView(arrangedSubviews: [ hStack, titleField, descriptionView ])
         vStack.axis = .vertical
